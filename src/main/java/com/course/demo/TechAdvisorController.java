@@ -8,6 +8,8 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,9 +23,13 @@ import java.util.Map;
 public class TechAdvisorController {
     private final ChatClient chatClient;
     private final ChatClient chatClientWithDefaultPersona;
+
+    @Value("classpath:/prompts/recipe-prompts.st")
+    private Resource programPromt;
+
     public TechAdvisorController(ChatClient.Builder builder) {
         this.chatClient = builder.build();
-        this.chatClientWithDefaultPersona = builder.defaultSystem("You are strict technical interviewer conducting a Java backend interview."+
+        this.chatClientWithDefaultPersona = builder.clone().defaultSystem("You are strict technical interviewer conducting a Java backend interview."+
                 "Ask probing follow-up questions in your response.").build();
     }
 
@@ -62,5 +68,12 @@ public class TechAdvisorController {
     @GetMapping("/inline-prompt-templates")
     public String inlinePromptTemplates(@RequestParam String question, @RequestParam String personaName){
         return "<pre>"+chatClient.prompt().user(u->u.text("Write a short story about "+personaName+". "+question).param("personaName", personaName).param("question", question)).call().content()+"<pre>";
+    }
+
+    @GetMapping("/external-prompt-file")
+    public String externalPromptFile(@RequestParam String concept){
+        PromptTemplate promptTemplate = new PromptTemplate(programPromt);
+        Prompt prompt = promptTemplate.create(Map.of("concept", concept));
+        return "<pre>"+chatClient.prompt(prompt).call().content()+"<pre>";
     }
 }
