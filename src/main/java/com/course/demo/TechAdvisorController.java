@@ -36,4 +36,9 @@ public class TechAdvisorController {
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage, priorReply, newUserMessage));
         return chatClient.prompt(prompt).call().content();
     }
+
+    @GetMapping("/system-prompt")
+    public String systemPrompt(){
+        return chatClient.prompt().system("You are a helpful Java Tutor.").user("Explain Spring Boot in simple and easy to understand format.").call().content();
+    }
 }
