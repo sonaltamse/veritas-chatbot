@@ -58,4 +58,9 @@ public class TechAdvisorController {
         Prompt prompt = promptTemplate.create(Map.of("question", question, "personaName", personaName));
         return "<pre>"+chatClient.prompt(prompt).call().content()+"<pre>";
     }
+
+    @GetMapping("/inline-prompt-templates")
+    public String inlinePromptTemplates(@RequestParam String question, @RequestParam String personaName){
+        return "<pre>"+chatClient.prompt().user(u->u.text("Write a short story about "+personaName+". "+question).param("personaName", personaName).param("question", question)).call().content()+"<pre>";
+    }
 }
