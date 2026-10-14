@@ -18,8 +18,11 @@ import java.util.List;
 @RequestMapping("/advisor")
 public class TechAdvisorController {
     private final ChatClient chatClient;
+    private final ChatClient chatClientWithDefaultPersona;
     public TechAdvisorController(ChatClient.Builder builder) {
         this.chatClient = builder.build();
+        this.chatClientWithDefaultPersona = builder.defaultSystem("You are strict technical interviewer conducting a Java backend interview."+
+                "Ask probing follow-up questions in your response.").build();
     }
 
     @GetMapping
@@ -40,5 +43,10 @@ public class TechAdvisorController {
     @GetMapping("/system-prompt")
     public String systemPrompt(){
         return chatClient.prompt().system("You are a helpful Java Tutor.").user("Explain Spring Boot in simple and easy to understand format.").call().content();
+    }
+
+    @GetMapping("/default-system-prompt")
+    public String defaultSystemPrompt(@RequestParam String question){
+        return chatClient.prompt().user(question).call().content();
     }
 }
